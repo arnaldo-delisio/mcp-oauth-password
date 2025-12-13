@@ -11,13 +11,15 @@
  */
 
 import type { Request, Response } from 'express';
+import type { Pool } from 'pg';
 import bcrypt from 'bcrypt';
 import type { OAuthConfig } from '../types/index.js';
+import { logAuthEvent } from '../utils/audit-log.js';
 
 /**
  * Create login handler
  */
-export function createLoginHandler(config: OAuthConfig) {
+export function createLoginHandler(config: OAuthConfig, pool: Pool) {
   return async function handleLogin(req: Request, res: Response): Promise<void> {
     try {
       const { password, original_url } = req.body;
@@ -50,6 +52,13 @@ export function createLoginHandler(config: OAuthConfig) {
 
       if (!passwordValid) {
         console.log('[OAuth Login] Invalid password');
+
+        // Log failed login attempt
+        await logAuthEvent(pool, 'login_failure', req, {
+          success: false,
+          errorMessage: 'Invalid password',
+        });
+
         res.render('login', {
           error: 'Invalid password',
           originalUrl: original_url,
@@ -61,6 +70,11 @@ export function createLoginHandler(config: OAuthConfig) {
       req.session.authenticated = true;
 
       console.log('[OAuth Login] Authentication successful, redirecting to:', original_url);
+
+      // Log successful login
+      await logAuthEvent(pool, 'login_success', req, {
+        success: true,
+      });
 
       // Redirect to original authorization URL
       res.redirect(original_url);

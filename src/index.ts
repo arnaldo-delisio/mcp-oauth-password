@@ -9,6 +9,8 @@ import type { Express, Request, Response } from 'express';
 import pg from 'pg';
 import type { OAuthConfig } from './types/index.js';
 import { createSessionMiddleware } from './middleware/session.js';
+import { loginRateLimiter, tokenRateLimiter, authorizeRateLimiter } from './middleware/rate-limit.js';
+import { initAuditLogging } from './utils/audit-log.js';
 import { createAuthorizeHandler } from './oauth/authorize.js';
 import { createTokenHandler } from './oauth/token.js';
 import { createLoginHandler } from './oauth/login.js';
@@ -24,6 +26,9 @@ export function setupOAuth(app: Express, config: OAuthConfig) {
   const pool = typeof config.database === 'string'
     ? new Pool({ connectionString: config.database })
     : config.database;
+
+  // Initialize audit logging (creates table if needed)
+  initAuditLogging(pool);
 
   // Add session middleware
   const sessionMiddleware = createSessionMiddleware(config, pool);
@@ -58,10 +63,10 @@ export function setupOAuth(app: Express, config: OAuthConfig) {
     });
   });
 
-  // OAuth 2.1 Authorization Endpoints
-  app.get('/oauth/authorize', createAuthorizeHandler(config, pool));
-  app.post('/oauth/token', createTokenHandler(config, pool));
-  app.post('/login', createLoginHandler(config));
+  // OAuth 2.1 Authorization Endpoints (with rate limiting)
+  app.get('/oauth/authorize', authorizeRateLimiter, createAuthorizeHandler(config, pool));
+  app.post('/oauth/token', tokenRateLimiter, createTokenHandler(config, pool));
+  app.post('/login', loginRateLimiter, createLoginHandler(config, pool));
   app.post('/oauth/register', createRegisterHandler(pool));
 
   return { pool, sessionMiddleware };
@@ -104,6 +109,9 @@ export function createAuthMiddleware(config: OAuthConfig) {
     next();
   };
 }
+
+// Export rate limiters (for customization)
+export { loginRateLimiter, tokenRateLimiter, authorizeRateLimiter } from './middleware/rate-limit.js';
 
 // Export types
 export * from './types/index.js';

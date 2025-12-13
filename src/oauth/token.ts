@@ -17,6 +17,7 @@ import type { Pool } from 'pg';
 import { getAuthCode, deleteAuthCode } from './storage.js';
 import { verifyPKCE, validateCodeVerifier } from './pkce.js';
 import { validateClient, getClient } from './clients.js';
+import { logAuthEvent } from '../utils/audit-log.js';
 import type { TokenRequest, OAuthError, TokenResponse, OAuthConfig } from '../types/index.js';
 
 /**
@@ -161,6 +162,14 @@ export function createTokenHandler(config: OAuthConfig, pool: Pool) {
 
       if (!pkceValid) {
         deleteAuthCode(pool, code);
+
+        // Log failed token exchange
+        await logAuthEvent(pool, 'token_failure', req, {
+          success: false,
+          clientId: client_id,
+          errorMessage: 'PKCE verification failed',
+        });
+
         sendError(res, 'invalid_grant', 'PKCE verification failed');
         return;
       }
@@ -169,6 +178,12 @@ export function createTokenHandler(config: OAuthConfig, pool: Pool) {
       deleteAuthCode(pool, code);
 
       console.log('[OAuth Token] Token exchange successful');
+
+      // Log successful token exchange
+      await logAuthEvent(pool, 'token_exchange', req, {
+        success: true,
+        clientId: client_id,
+      });
 
       // Return access token
       const scopes = config.scopes || ['mcp:tools:*', 'mcp:resources:*', 'mcp:prompts:*'];

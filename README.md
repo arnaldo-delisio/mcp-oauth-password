@@ -16,16 +16,14 @@ Perfect for personal MCP servers and self-hosted tools.
 
 ## Security & Production Readiness
 
-**⚠️ Current Version (0.1.x):** Designed for **personal/self-hosted** MCP servers
-
-This version is secure for personal use but lacks features needed for production/multi-user deployments.
+**✅ Current Version (0.2.x):** Suitable for **personal/self-hosted** MCP servers with enhanced security
 
 **Roadmap to Production:**
-- **v0.2.0** (Coming Soon) - Rate limiting + audit logging
-- **v0.3.0** - Token expiration + refresh tokens
-- **v1.0.0** - Production-ready with full security features
+- **v0.2.0** ✅ - Rate limiting + audit logging
+- **v0.3.0** (Coming Soon) - Token expiration + refresh tokens
+- **v1.0.0** - Production-ready with multi-user support
 
-**Current Security Features:**
+**Security Features (v0.2.0):**
 - ✅ OAuth 2.1 with PKCE
 - ✅ Bcrypt password hashing (10 rounds)
 - ✅ Secure session cookies (httpOnly, secure, sameSite)
@@ -33,15 +31,15 @@ This version is secure for personal use but lacks features needed for production
 - ✅ Short-lived auth codes (10 min, single-use)
 - ✅ Redirect URI validation
 - ✅ HTTPS enforcement in production
+- ✅ **NEW:** Rate limiting (5 login attempts per 15 min)
+- ✅ **NEW:** Audit logging (tracks all auth events)
 
-**Missing for Production Use:**
-- ❌ Rate limiting (brute force protection)
-- ❌ Audit logging (security monitoring)
+**Still Missing for Production:**
 - ❌ Token expiration + refresh tokens
 - ❌ Multi-user support
 - ❌ Account lockout after failed attempts
 
-For production use now, add your own rate limiting and monitoring layers.
+For production use, wait for v1.0 or add token expiration yourself.
 
 ## Installation
 
@@ -164,8 +162,55 @@ The package automatically creates required tables:
 - `authorization_codes` - Temporary auth codes (10-min TTL)
 - `oauth_clients` - Registered OAuth clients
 - `session` - Persistent sessions
+- `auth_logs` - Audit log for security monitoring **(v0.2.0+)**
 
 Just provide a PostgreSQL connection string.
+
+## New in v0.2.0
+
+### Rate Limiting
+
+Automatic rate limiting protects against brute force attacks:
+- **Login:** 5 attempts per 15 minutes
+- **Token:** 10 attempts per 15 minutes
+- **Authorize:** 20 attempts per 15 minutes
+
+Rate limiters are automatically applied. You can customize them:
+
+```typescript
+import { setupOAuth, loginRateLimiter } from 'mcp-oauth-password';
+import rateLimit from 'express-rate-limit';
+
+// Use default rate limiting
+setupOAuth(app, config);
+
+// OR customize the login rate limiter
+const customLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 3, // 3 attempts
+});
+
+app.post('/login', customLimiter, ...);
+```
+
+### Audit Logging
+
+All authentication events are automatically logged to the `auth_logs` table:
+
+```sql
+SELECT * FROM auth_logs
+WHERE event IN ('login_success', 'login_failure', 'token_exchange')
+ORDER BY created_at DESC
+LIMIT 100;
+```
+
+Logged events:
+- `login_success` / `login_failure` - Password login attempts
+- `token_exchange` / `token_failure` - OAuth token exchanges
+- `authorize_request` - Authorization requests
+- `client_registration` - New OAuth client registrations
+
+Each log includes: IP address, user agent, client ID, success/failure, error message, and timestamp.
 
 ## Claude Mobile Configuration
 
