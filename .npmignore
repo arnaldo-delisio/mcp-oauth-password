@@ -1,0 +1,23 @@
+# Source files (only ship dist/)
+src/
+tsconfig.json
+example/
+
+# Development
+.env
+.env.*
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Git
+.git/
+.gitignore
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo

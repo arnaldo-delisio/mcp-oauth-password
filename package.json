@@ -1,0 +1,56 @@
+{
+  "name": "mcp-oauth-password",
+  "version": "0.1.0",
+  "description": "Simple password-based OAuth 2.1 implementation for MCP servers - no third-party OAuth required",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "oauth",
+    "oauth2.1",
+    "pkce",
+    "authentication",
+    "password-auth",
+    "express",
+    "postgresql"
+  ],
+  "author": "Arnaldo Delisio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arnaldo-delisio/mcp-oauth-password.git"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "express-session": "^1.18.2",
+    "pg": "^8.13.1"
+  },
+  "peerDependencies": {
+    "express": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.2",
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
