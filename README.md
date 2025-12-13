@@ -8,11 +8,40 @@ Most MCP OAuth implementations require complex third-party providers (GitHub, Ke
 
 - ✅ **Simple password authentication** - No GitHub/Google/Auth0 required
 - ✅ **OAuth 2.1 compliant** - Authorization Code Flow with PKCE
-- ✅ **Production ready** - Persistent sessions, secure cookies
+- ✅ **Secure for personal use** - Persistent sessions, secure cookies, bcrypt
 - ✅ **Works on Claude mobile** - Tested and working
 - ✅ **Self-contained** - Just Node.js + PostgreSQL
 
-Perfect for personal MCP servers or internal tools where you control access.
+Perfect for personal MCP servers and self-hosted tools.
+
+## Security & Production Readiness
+
+**⚠️ Current Version (0.1.x):** Designed for **personal/self-hosted** MCP servers
+
+This version is secure for personal use but lacks features needed for production/multi-user deployments.
+
+**Roadmap to Production:**
+- **v0.2.0** (Coming Soon) - Rate limiting + audit logging
+- **v0.3.0** - Token expiration + refresh tokens
+- **v1.0.0** - Production-ready with full security features
+
+**Current Security Features:**
+- ✅ OAuth 2.1 with PKCE
+- ✅ Bcrypt password hashing (10 rounds)
+- ✅ Secure session cookies (httpOnly, secure, sameSite)
+- ✅ PostgreSQL session storage (persistent)
+- ✅ Short-lived auth codes (10 min, single-use)
+- ✅ Redirect URI validation
+- ✅ HTTPS enforcement in production
+
+**Missing for Production Use:**
+- ❌ Rate limiting (brute force protection)
+- ❌ Audit logging (security monitoring)
+- ❌ Token expiration + refresh tokens
+- ❌ Multi-user support
+- ❌ Account lockout after failed attempts
+
+For production use now, add your own rate limiting and monitoring layers.
 
 ## Installation
 
