@@ -19,10 +19,7 @@ export const loginRateLimiter = rateLimit({
   },
   standardHeaders: true, // Return rate limit info in headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
-  // Use IP address as key
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  },
+  // Skip custom keyGenerator - use default (handles IPv6 correctly)
 });
 
 /**
@@ -38,9 +35,7 @@ export const tokenRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  },
+  // Skip custom keyGenerator - use default (handles IPv6 correctly)
 });
 
 /**
@@ -56,7 +51,5 @@ export const authorizeRateLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.socket.remoteAddress || 'unknown';
-  },
+  // Skip custom keyGenerator - use default (handles IPv6 correctly)
 });
