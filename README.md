@@ -1,3 +1,14 @@
+---
+status: published
+category: mcp-server
+author: arnaldo-delisio
+published_npm: false
+npm_package: mcp-oauth-password
+published_directories: []
+production_url: null
+last_active: 2026-01-26
+---
+
 # mcp-oauth-password
 
 Simple password-based OAuth 2.1 implementation for MCP (Model Context Protocol) servers. **No third-party OAuth providers required** - just a password and PostgreSQL.
